@@ -1,9 +1,11 @@
 import PrivateMessageRepository from "../../webService/api/privateMessage/privateMessageRepository.js";
+import GroupMessageRepository from "../../webService/api/groupMessage/groupMessageRepository.js";
 import Jwt from "../../others/helpers/jwt.js";
 
 class SocketController {
   constructor() {
     this.privateMessageRepository = new PrivateMessageRepository();
+    this.groupMessageRepository = new GroupMessageRepository();
     this.jwt = new Jwt();
   }
 
@@ -31,8 +33,11 @@ class SocketController {
   };
 
   listenGroupMessages = async ({ socket }) => {
-    socket.on("group-message", ({ message, groupId, authToken }) => {
-      //   socket.emit("group1", { message });
+    socket.on("group-message", async ({ message, groupRoomId, authToken }) => {
+      const user = await this.jwt.verifyJWT({ token: authToken });
+      const senderId = user.id;
+      await this.groupMessageRepository.createGroupMessage({ senderId, groupId: groupRoomId, message });
+      socket.to(groupRoomId).emit("message", { message, senderId });
     });
   };
 }

@@ -26,6 +26,17 @@ class GroupValidation {
       throw new ValidationError({ message: error.message });
     }
   };
+
+  validateGetGroupRoom = async ({ groupRoomId }) => {
+    const schema = Joi.object({
+      groupRoomId: Joi.string().required(),
+    });
+    try {
+      await schema.validateAsync({ groupRoomId });
+    } catch (error) {
+      throw new ValidationError({ message: error.message });
+    }
+  };
 }
 
 export default GroupValidation;

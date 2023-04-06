@@ -1,6 +1,7 @@
 .sidebar-container {
   width: 15%;
-  border: 1px solid;
+  background-color: #e74646;
+  color: #ffe5ca;
   h1 {
     text-align: center;
   }
@@ -8,8 +9,8 @@
   .sidebar-rooms {
     height: 35%;
     h3 {
-      text-align: center;
-      border: 1px solid;
+      padding: 5px 0 0 10px;
+      border-top: 1px solid;
     }
     .sidebar-search-users,
     .sidebar-search-rooms {
@@ -22,13 +23,18 @@
     .sidebar-user-lists,
     .sidebar-room-lists {
       margin-top: 10px;
-      border: 1px solid;
+      // overflow-y: scroll;
       .sidebar-user-list,
       .sidebar-room-list {
-        text-align: center;
+        padding: 10px 5px 5px 30px;
         margin: 2px 0 2px 0;
         cursor: pointer;
-        border: 1px solid;
+        font-weight: 600;
+        list-style-type: circle;
+        &:hover {
+          background-color: #ffe5ca;
+          color: #e74646;
+        }
       }
     }
   }

@@ -10,7 +10,7 @@ const router = Router();
 
 router.use("/", authRouter);
 router.use("/group-rooms", groupRoomRouter);
-router.use("/group-rooms/messages", groupMessageRouter);
+router.use("/group-rooms", groupMessageRouter);
 router.use("/private-rooms", privateRoomRouter);
 router.use("/private-rooms", privateMessageRouter);
 router.use("/users", userRouter);

@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { getPrivateMessages } from "../../api/privateMessage";
 import getPrivateRoom from "../../api/privateRoom";
 import { sendGroupMassage, sendPrivateMessage } from "../../socket/socketFunc";
+import { getGroupRoom } from "../../api/groupRoom";
+import { getGroupMessages } from "../../api/groupMessage";
 
 const Chat = ({ socket }) => {
   const navigate = useNavigate();
@@ -23,40 +25,12 @@ const Chat = ({ socket }) => {
 
   useEffect(() => {
     socket.on("message", ({ message, senderId }) => {
-      console.log({ message });
       setMessages((oldMessages) => [...oldMessages, { message, senderId }]);
     });
     return () => socket.off("message");
   }, [socket]);
 
-  useEffect(() => {
-    socket.emit("join-room", { roomId: room._id });
-    if (room.type === "PRIVATE") {
-    }
-  }, [room]);
-
-  const displayMessage = () => {
-    return messages.map(({ message, senderId }, index) => {
-      const user = room.users.find(({ _id }) => _id === senderId);
-      if (senderId === userId) {
-        return (
-          <div key={`${senderId}${index}`} className="chat-room-message right">
-            {message}
-            <span>{user.name}</span>
-          </div>
-        );
-      } else {
-        return (
-          <div key={`${senderId}${index}`} className="chat-room-message left">
-            <span>{user.name}</span>
-            {message}
-          </div>
-        );
-      }
-    });
-  };
-
-  const clearMessage = () => {
+  const clearMessageInput = () => {
     document.getElementById("message-input").value = "";
     setMessage("");
   };
@@ -70,29 +44,39 @@ const Chat = ({ socket }) => {
       alert("Select room");
       return;
     }
-    if (room.type === "PRIVATE") {
-      setMessages([...messages, { message, senderId: userId, senderName: userName }]);
-      sendPrivateMessage({ message, privateRoomId: room._id, socket });
-    } else if (room.type === "GROUP") sendGroupMassage({ message, groupId: room.id, socket });
-    clearMessage();
+    setMessages([...messages, { message, senderId: userId, senderName: userName }]);
+    if (room.type === "PRIVATE") sendPrivateMessage({ message, privateRoomId: room._id, socket });
+    else if (room.type === "GROUP") sendGroupMassage({ message, groupRoomId: room._id, socket });
+    clearMessageInput();
   };
 
-  const handleSelectRoom = ({ id, type, name }) => {
+  const handleSelectRoom = async ({ id, type, name }) => {
+    socket.emit("leave-room", { roomId: room._id });
     if (type === "PRIVATE") {
-      getPrivateRoom({ receiverId: id }).then(({ status, body }) => {
+      const { status, body } = await getPrivateRoom({ receiverId: id });
+      const { _id, users } = body.privateRoom;
+      if (status === 200) {
+        const { status, body } = await getPrivateMessages({ privateRoomId: _id });
         if (status === 200) {
-          const { privateRoom } = body;
-          const { _id, users } = privateRoom;
+          const { messages } = body;
           setRoom({ _id, users, type, name });
-          getPrivateMessages({ privateRoomId: _id }).then(({ status, body }) => {
-            if (status === 200) {
-              const { messages } = body;
-              setMessages(messages);
-            }
-          });
+          setMessages(messages);
         }
-      });
+      }
     }
+    if (type === "GROUP") {
+      const { status, body } = await getGroupRoom({ groupRoomId: id });
+      const { _id, users } = body.groupRoom;
+      if (status === 200) {
+        const { status, body } = await getGroupMessages({ groupRoomId: _id });
+        if (status === 200) {
+          const { messages } = body;
+          setRoom({ _id, type, name, users });
+          setMessages(messages);
+        }
+      }
+    }
+    socket.emit("join-room", { roomId: room._id });
   };
 
   const handleLogout = () => {
@@ -101,26 +85,40 @@ const Chat = ({ socket }) => {
     navigate("/login");
   };
 
+  const displayMessage = () => {
+    return messages.map(({ message, senderId }, index) => {
+      const user = room.users.find(({ _id }) => _id === senderId);
+
+      return senderId !== user._id ? (
+        <div key={`${senderId}${index}`} className="chat-room-message right">
+          {message}
+          <span>{user.name || ""}</span>
+        </div>
+      ) : (
+        <div key={`${senderId}${index}`} className="chat-room-message left">
+          <span>{user.name || ""}</span>
+          {message}
+        </div>
+      );
+    });
+  };
+
   return (
     <div className="chat-container">
       <Sidebar onSelectRoom={handleSelectRoom} />
       <div className="chat-room-section">
         <div className="chat-room-title">
           <h1>{room.name}</h1>
-          <button onClick={() => handleLogout()}>Logout</button>
-        </div>
-        <div className="chat-room-messages">
-          {/* <div className="chat-room-message left">
-            <span>name</span>message-left
+          <div className="logout-button" onClick={() => handleLogout()}>
+            <i className="fa-solid fa-right-from-bracket"></i>
           </div>
-          <div className="chat-room-message right">
-            message-right<span>name</span>
-          </div> */}
-          {displayMessage()}
         </div>
+        <div className="chat-room-messages">{displayMessage()}</div>
         <div className="chat-message-input">
           <input id="message-input" onChange={(event) => setMessage(event.target.value)} />
-          <button onClick={() => handleSendMessage()}>send</button>
+          <button className="send-button" onClick={() => handleSendMessage()}>
+            <i className="fa-solid fa-arrow-right "></i>
+          </button>
         </div>
       </div>
     </div>
