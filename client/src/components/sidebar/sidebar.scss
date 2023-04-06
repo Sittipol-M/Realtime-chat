@@ -1,0 +1,35 @@
+.sidebar-container {
+  width: 15%;
+  border: 1px solid;
+  h1 {
+    text-align: center;
+  }
+  .sidebar-users,
+  .sidebar-rooms {
+    height: 35%;
+    h3 {
+      text-align: center;
+      border: 1px solid;
+    }
+    .sidebar-search-users,
+    .sidebar-search-rooms {
+      display: flex;
+      justify-content: center;
+      input {
+        width: 70%;
+      }
+    }
+    .sidebar-user-lists,
+    .sidebar-room-lists {
+      margin-top: 10px;
+      border: 1px solid;
+      .sidebar-user-list,
+      .sidebar-room-list {
+        text-align: center;
+        margin: 2px 0 2px 0;
+        cursor: pointer;
+        border: 1px solid;
+      }
+    }
+  }
+}
