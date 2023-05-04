@@ -1,0 +1,10 @@
+{
+  "apps": [
+    {
+      "name": "realtime-chat-client",
+      "script": "npx",
+      "interpreter": "none",
+      "args": "serve -s build -p 12000"
+    }
+  ]
+}
