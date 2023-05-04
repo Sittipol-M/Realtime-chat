@@ -88,15 +88,14 @@ const Chat = ({ socket }) => {
   const displayMessage = () => {
     return messages.map(({ message, senderId }, index) => {
       const user = room.users.find(({ _id }) => _id === senderId);
-
-      return senderId !== user._id ? (
+      return senderId === userId ? (
         <div key={`${senderId}${index}`} className="chat-room-message right">
           {message}
-          <span>{user.name || ""}</span>
+          <span>{user.name}</span>
         </div>
       ) : (
         <div key={`${senderId}${index}`} className="chat-room-message left">
-          <span>{user.name || ""}</span>
+          <span>{user.name}</span>
           {message}
         </div>
       );

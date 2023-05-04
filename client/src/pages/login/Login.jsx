@@ -23,7 +23,6 @@ const Login = () => {
       localStorage.setItem("userTel", tel);
       localStorage.setItem("userTel", tel);
       localStorage.setItem("userName", name);
-
       if (localStorage.getItem("authToken") === authToken) {
         navigate("/chat");
       }
